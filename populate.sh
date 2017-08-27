@@ -14,6 +14,12 @@ case $i in
     -b|--build)
     BUILD=1
     ;;
+    -a|--arm)
+    ARM=1
+    ;;
+    -n|--native)
+    NATIVE=1
+    ;;
     *)
     echo "populate.sh: unrecognized option '$1'"
     echo "Try 'populate.sh --help' for more information"
@@ -30,6 +36,8 @@ if [ $HELP ] ; then
     echo "  -c|--clean  Deletes the build directory."
     echo "  -f|--fast   Only generates debug build files and not release build files."
     echo "  -b|--build  Builds the source code."
+    echo "  -a|--arm    Builds the cross compilation arm targets."
+    echo "  -n|--native Build the native targets."
     exit 0
 fi
 
@@ -40,7 +48,13 @@ GENERATOR="-GNinja"
 RELEASE="-DCMAKE_BUILD_TYPE=Release"
 
 # Configure the cross compilation options.
-CROSS_ARGS=""
+CROSS_ARGS="-DCMAKE_TOOLCHAIN_FILE=cmake/arm-gcc-toolchain.cmake"
+
+# If neither native or arm specified generate both.
+if [ ! $NATIVE ] && [ ! $ARM ] && [ ! $BUILD ] ; then
+    NATIVE=1
+    ARM=1
+fi
 
 # Generate the build files.
 if [ $CLEAN ] ; then
@@ -49,47 +63,67 @@ if [ $CLEAN ] ; then
     # Remove the build files.
     rm -rf build/
 else
-    # Create the debug build directories.
-    mkdir -p build/debug
 
-    if [ $CROSS ] ; then
-        mkdir -p build/cross-debug
+    # Create the debug native files.
+    if [ $NATIVE ] ; then
+        mkdir -p build/debug
+
+        if [ ! -f build/debug/build.ninja ] ; then
+            cmake -H. -Bbuild/debug $GENERATOR
+        fi
     fi
 
-    if [ ! -f build/debug/build.ninja ] ; then
-        cmake -H. -Bbuild/debug $GENERATOR
-    fi
+    # Generate the debug arm files.
+    if [ $ARM ] ; then
+        mkdir -p build/arm-debug
 
-    if [ ! -f build/cross-debug/build.ninja ] ; then
-        cmake -H. -Bbuild/cross-debug $GENERATOR $CROSS_ARGS
+        if [ ! -f build/arm-debug/build.ninja ] ; then
+            cmake -H. -Bbuild/arm-debug $GENERATOR $CROSS_ARGS
+        fi
     fi
 
     if [[ $FAST -ne 1 ]] ; then
-        # Create the release build directories.
-        mkdir -p build/release
-        mkdir -p build/cross-release
 
-        if [ ! -f "build/release/build.ninja" ] ; then
-            cmake -H. -Bbuild/release $GENERATOR $RELEASE
+        # Generate the release native build files.
+        if [ $NATIVE ] ; then
+            mkdir -p build/release
+
+            if [ ! -f "build/release/build.ninja" ] ; then
+                cmake -H. -Bbuild/release $GENERATOR $RELEASE
+            fi
         fi
 
-        if [ ! -f "build/cross-release/build.ninja" ] ; then
-            cmake -H. -Bbuild/cross-release $GENERATOR $CROSS_ARGS $RELEASE
+        # Generate the release arm build files.
+        if [ $ARM ] ; then
+            mkdir -p build/arm-release
+
+            if [ ! -f "build/arm-release/build.ninja" ] && [ $ARM ] ; then
+                cmake -H. -Bbuild/arm-release $GENERATOR $CROSS_ARGS $RELEASE
+            fi
         fi
     fi
 fi
 
 # Build the code.
 if [ $BUILD ] ; then
-    echo "Building build/debug"
-    cmake --build build/debug
 
-    echo "Building build/release"
-    cmake --build build/release
+    if [ -d build/debug ] ; then
+        echo "Building build/debug"
+        cmake --build build/debug
+    fi
 
-    echo "Building build/cross-debug"
-    cmake --build build/cross-debug
+    if [ -d build/release ] ; then
+        echo "Building build/release"
+        cmake --build build/release
+    fi
 
-    echo "Building build/cross-release"
-    cmake --build build/cross-release
+    if [ -d build/arm-debug ] ; then
+        echo "Building build/arm-debug"
+        cmake --build build/arm-debug
+    fi
+
+    if [ -d build/arm-release ] ; then
+        echo "Building build/arm-release"
+        cmake --build build/arm-release
+    fi
 fi
