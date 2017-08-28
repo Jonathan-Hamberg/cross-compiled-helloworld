@@ -42,7 +42,7 @@ if [ $HELP ] ; then
 fi
 
 # Configure the cmake build generator options.
-GENERATOR="-GNinja"
+GENERATOR="-GNinja -DCMAKE_EXPORT_COMPILE_COMMANDS=ON"
 
 # Configure the release build options.
 RELEASE="-DCMAKE_BUILD_TYPE=Release"
