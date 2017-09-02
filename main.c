@@ -26,7 +26,7 @@
   @brief Hello world function for testing cross compilation.
   @author Jonathan Hamberg
   */
-#include <iostream>
+#include <stdio.h> 
 
 /**
    @brief This function is used to test the cross compilation for arm targets.
@@ -38,19 +38,6 @@
  */
 int main(int argc, char const* argv[])
 {
-    std::cout << "hello, world!" << std::endl;
+    printf("Hello World!\n");
     return 0;
-    int *pointer = NULL;
 }
-
-/**
- * @brief  ohtensuhtoesnujj
- */
-class Awesome {
-
-    public:
-        /**
-         * @brief  hateosuhtaosneu
-         */
-        Awesome();
-};

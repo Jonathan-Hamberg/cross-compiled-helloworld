@@ -70,6 +70,7 @@ else
 
         if [ ! -f build/debug/build.ninja ] ; then
             cmake -H. -Bbuild/debug $GENERATOR
+            ninja -C build/debug 3rd-party
         fi
     fi
 
@@ -79,6 +80,7 @@ else
 
         if [ ! -f build/arm-debug/build.ninja ] ; then
             cmake -H. -Bbuild/arm-debug $GENERATOR $CROSS_ARGS
+            ninja -C build/arm-debug 3rd-party
         fi
     fi
 
@@ -90,6 +92,7 @@ else
 
             if [ ! -f "build/release/build.ninja" ] ; then
                 cmake -H. -Bbuild/release $GENERATOR $RELEASE
+                ninja -C build/release 3rd-party
             fi
         fi
 
@@ -99,6 +102,7 @@ else
 
             if [ ! -f "build/arm-release/build.ninja" ] && [ $ARM ] ; then
                 cmake -H. -Bbuild/arm-release $GENERATOR $CROSS_ARGS $RELEASE
+                ninja -C build/arm-release 3rd-party
             fi
         fi
     fi
