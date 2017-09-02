@@ -20,6 +20,9 @@ case $i in
     -n|--native)
     NATIVE=1
     ;;
+    -e|--extra)
+    EXTRA=1
+    ;;
     *)
     echo "populate.sh: unrecognized option '$1'"
     echo "Try 'populate.sh --help' for more information"
@@ -38,11 +41,16 @@ if [ $HELP ] ; then
     echo "  -b|--build  Builds the source code."
     echo "  -a|--arm    Builds the cross compilation arm targets."
     echo "  -n|--native Build the native targets."
+    echo "  -e|--extra  Include extra features supported by the desktop.  e.g. catch, doxygen"
     exit 0
 fi
 
 # Configure the cmake build generator options.
 GENERATOR="-GNinja -DCMAKE_EXPORT_COMPILE_COMMANDS=ON"
+
+if [ $EXTRA ] ; then
+    GENERATOR=$GENERATOR" -DEXTRA=ON"
+fi
 
 # Configure the release build options.
 RELEASE="-DCMAKE_BUILD_TYPE=Release"
@@ -69,7 +77,7 @@ else
         mkdir -p build/debug
 
         if [ ! -f build/debug/build.ninja ] ; then
-            cmake -H. -Bbuild/debug $GENERATOR
+            cmake -H. -Bbuild/debug $GENERATOR $EXTRA_ARGS
             ninja -C build/debug 3rd-party
         fi
     fi
@@ -91,7 +99,7 @@ else
             mkdir -p build/release
 
             if [ ! -f "build/release/build.ninja" ] ; then
-                cmake -H. -Bbuild/release $GENERATOR $RELEASE
+                cmake -H. -Bbuild/release $GENERATOR $RELEASE $EXTRA_ARGS
                 ninja -C build/release 3rd-party
             fi
         fi
