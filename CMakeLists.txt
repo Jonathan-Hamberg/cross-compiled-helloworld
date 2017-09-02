@@ -10,7 +10,7 @@ add_executable ( cross ${SOURCES} )
 
 # Clang Tidy.
 add_custom_command( OUTPUT tidy.out
-    COMMAND run-clang-tidy-3.8.py --extra-arg="-I/usr/include/c++/6.3.0/tr1/"
+    COMMAND run-clang-tidy-3.8.py
     COMMAND touch tidy.out
     DEPENDS ${SOURCES}
     )
