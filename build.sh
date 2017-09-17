@@ -56,7 +56,7 @@ fi
 RELEASE="-DCMAKE_BUILD_TYPE=Release"
 
 # Configure the cross compilation options.
-CROSS_ARGS="-DCMAKE_TOOLCHAIN_FILE=cmake/arm-gcc-toolchain.cmake"
+CROSS_ARGS="-DCMAKE_TOOLCHAIN_FILE=cmake/arm-gcc-toolchain.cmake -DCROSS_COMPILE=ON"
 
 # If neither native or arm specified generate both.
 if [ ! $NATIVE ] && [ ! $ARM ] && [ ! $BUILD ] ; then
